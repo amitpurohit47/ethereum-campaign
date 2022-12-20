@@ -47,4 +47,74 @@ describe("Campaigns", () => {
     const manager = await campaign.methods.manager().call();
     assert.equal(manager, accounts[0]);
   });
+
+  // checking if allows people to contribute and become approvers
+  it("allows people to contribute and become approvers", async () => {
+    await campaign.methods.contribute().send({
+      value: "101",
+      from: accounts[1],
+    });
+
+    const isContributor = await campaign.methods.approvers(accounts[1]).call();
+    assert(isContributor);
+  });
+
+  it("requires a minimum contribution", async () => {
+    try {
+      await campaign.methods.contribute().send({
+        value: "0",
+        from: accounts[1],
+      });
+      assert(false);
+    } catch (error) {
+      assert(true);
+    }
+  });
+
+  it("allows manager to create a request", async () => {
+    await campaign.methods
+      .createRequest("Buy Batteries", "100", accounts[1])
+      .send({
+        from: accounts[0],
+        gas: "1000000",
+      });
+    const request = await campaign.methods.requests(0).call();
+
+    assert.equal(request.description, "Buy Batteries");
+  });
+
+  it("processes requests", async () => {
+    await campaign.methods.contribute().send({
+      value: web3.utils.toWei("10", "ether"),
+      from: accounts[1],
+    });
+
+    let initialBalance = await web3.eth.getBalance(accounts[2]);
+    initialBalance = web3.utils.fromWei(initialBalance, "ether");
+    await campaign.methods
+      .createRequest(
+        "Buy Batteries",
+        web3.utils.toWei("5", "ether"),
+        accounts[2]
+      )
+      .send({
+        from: accounts[0],
+        gas: "1000000",
+      });
+
+    await campaign.methods.approveRequest(0).send({
+      from: accounts[1],
+      gas: "1000000",
+    });
+
+    await campaign.methods.finalizeRequest(0).send({
+      from: accounts[0],
+      gas: "1000000",
+    });
+
+    let finalBalance = await web3.eth.getBalance(accounts[2]);
+    finalBalance = web3.utils.fromWei(finalBalance, "ether");
+
+    assert(finalBalance - initialBalance > 4);
+  });
 });
