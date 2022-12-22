@@ -37,11 +37,7 @@ contract Campaign {
         _;
     }
 
-    constructor(
-        uint256 minimum,
-        string memory name,
-        address mngr
-    ) public {
+    constructor(uint256 minimum, string memory name, address mngr) public {
         manager = mngr;
         minimumContribution = minimum;
         campaignName = name;
@@ -85,5 +81,24 @@ contract Campaign {
 
         request.recepient.transfer(request.value);
         request.complete = true;
+    }
+
+    function getSummary()
+        public
+        view
+        returns (string, uint, uint, uint, uint, address)
+    {
+        return (
+            campaignName,
+            minimumContribution,
+            this.balance,
+            requests.length,
+            approversCount,
+            manager
+        );
+    }
+
+    function getRequestsCount() public view returns (uint) {
+        return requests.length;
     }
 }
