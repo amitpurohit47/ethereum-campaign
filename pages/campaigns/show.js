@@ -1,5 +1,6 @@
 import React from "react";
-import { Card, Grid } from "semantic-ui-react";
+import { Card, Grid, Button } from "semantic-ui-react";
+import { Link } from "../../routes";
 import Layout from "../../components/Layout";
 import Campaign from "../../ethereum/campaign"; // Capital case because maybe we may use campaign somewhere else
 import ContibuteForm from "../../components/ContibuteForm";
@@ -55,12 +56,27 @@ const CampaignShow = ({
 
   return (
     <Layout>
-      <h3>{campaignName}</h3>
-      <Grid>
-        <Grid.Column width={10}>{renderCards()}</Grid.Column>
-        <Grid.Column width={6}>
-          <ContibuteForm campaignAddress={campaignAddress} />
-        </Grid.Column>
+      <Grid style={{marginTop: "20px"}}>
+        <Grid.Row>
+          <Grid.Column>
+            <h3>{campaignName}</h3>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column width={10}>{renderCards()}</Grid.Column>
+          <Grid.Column width={6}>
+            <ContibuteForm campaignAddress={campaignAddress} />
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Link route={`/campaigns/${campaignAddress}/requests`}>
+              <a>
+                <Button primary>View Requests</Button>
+              </a>
+            </Link>
+          </Grid.Column>
+        </Grid.Row>
       </Grid>
     </Layout>
   );
